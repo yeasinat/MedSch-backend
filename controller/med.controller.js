@@ -4,12 +4,13 @@ const prisma = new PrismaClient();
 
 export const createMed = async (req, res, next) => {
   try {
-    const { medStartDate, medEndDate, dosagePerDay } = req.body;
+    const { medStartDate, medEndDate, dosagePerDay, frequency } = req.body;
 
     const neededMed = calculateTotalDosage(
       medStartDate,
       medEndDate,
-      dosagePerDay
+      dosagePerDay,
+      frequency
     );
 
     const med = await prisma.medication.create({
@@ -49,7 +50,7 @@ export const getMeds = async (req, res, next) => {
 export const getMedById = async (req, res, next) => {
   try {
     const med = await prisma.medication.findUnique({
-      where: { id: req.params.id, userId: req.user.id },
+      where: { id: parseInt(req.params.id), userId: req.user.id },
     });
 
     if (!med) {
@@ -70,8 +71,13 @@ export const updateMed = async (req, res, next) => {
 
     // Calculate neededMed if any relevant field is provided
     let neededMed;
-    if (medStartDate || medEndDate || dosagePerDay) {
-      neededMed = calculateTotalDosage(medStartDate, medEndDate, dosagePerDay);
+    if (medStartDate || medEndDate || dosagePerDay || frequency) {
+      neededMed = calculateTotalDosage(
+        medStartDate,
+        medEndDate,
+        dosagePerDay,
+        frequency
+      );
     }
 
     const updatedMed = await prisma.medication.update({
