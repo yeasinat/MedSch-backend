@@ -35,3 +35,5 @@ export const authorize = async (req, res, next) => {
     next(error);
   }
 };
+
+// TODO middleware for error handling

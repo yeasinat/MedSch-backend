@@ -1,11 +1,19 @@
 import express from "express";
 import { authorize } from "../middlewares/auth.middleware";
-import { createMed, getMedById, getMeds } from "../controller/med.controller";
+import {
+  createMed,
+  deleteMed,
+  getMedById,
+  getMeds,
+  updateMed,
+} from "../controller/med.controller";
 
 const medRouter = express.Router();
 
-medRouter.post("/", authorize, createMed);
 medRouter.get("/", authorize, getMeds);
+medRouter.post("/", authorize, createMed);
 medRouter.get("/:id", authorize, getMedById);
+medRouter.put("/:id", authorize, updateMed);
+medRouter.delete("/:id", authorize, deleteMed);
 
 export default medRouter;

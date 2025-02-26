@@ -51,7 +51,54 @@ export const getMedById = async (req, res, next) => {
     const med = await prisma.medication.findUnique({
       where: { id: req.params.id, userId: req.user.id },
     });
+
+    if (!med) {
+      return res.status(404).json({ message: "Medication not found" });
+    }
+
     return res.json(med);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateMed = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, dosagePerDay, medStartDate, medEndDate, frequency } =
+      req.body;
+
+    // Calculate neededMed if any relevant field is provided
+    let neededMed;
+    if (medStartDate || medEndDate || dosagePerDay) {
+      neededMed = calculateTotalDosage(medStartDate, medEndDate, dosagePerDay);
+    }
+
+    const updatedMed = await prisma.medication.update({
+      where: { id: parseInt(id) },
+      data: {
+        name,
+        dosagePerDay,
+        medStartDate,
+        medEndDate,
+        frequency,
+        neededMed,
+      },
+    });
+
+    return res.json(updatedMed);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteMed = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await prisma.medication.delete({
+      where: { id: parseInt(id) },
+    });
+    return res.json({ message: "Medication deleted successfully" });
   } catch (error) {
     next(error);
   }
